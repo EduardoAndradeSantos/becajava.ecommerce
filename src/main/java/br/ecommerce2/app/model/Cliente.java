@@ -4,15 +4,16 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 @Entity
-public class Cliente {
+public class Cliente extends BaseResponse {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long Id;
 	private String Nome;
-	private String Telefone;
+	private String Telefone;	
 	
 	public Long getId() {
 		return Id;

@@ -1,11 +1,14 @@
 package br.ecommerce2.app.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.ecommerce2.app.repository.*;
+import br.ecommerce2.app.spec.ClienteList;
+import br.ecommerce2.app.spec.ClienteSpec;
 import br.ecommerce2.app.model.*;
 
 @Service
@@ -18,13 +21,93 @@ public class ClienteService {
 		_repository = repository;
 	}	
 	
-	public void inserir(Cliente cliente) {
-		cliente.setId(new Long(0));
-		_repository.save(cliente);		
+	public BaseResponse inserir(ClienteSpec clienteSpec) {		
+		Cliente cliente = new Cliente();
+		BaseResponse base = new BaseResponse();
+		base.StatusCode = 400;
+
+		if (clienteSpec.getNome() == "") {			
+			base.Message = "O nome do cliente não foi preenchido.";
+			return base;
+		}
+			
+		if (clienteSpec.getTelefone() == "") {
+			base.Message = "O telefone do cliente não foi preenchido.";
+			return base;
+		}		
+		
+		cliente.setNome(clienteSpec.getNome());
+		cliente.setTelefone(clienteSpec.getTelefone());				
+
+		_repository.save(cliente);
+		base.StatusCode = 201;
+		base.Message = "Cliente inserido com sucesso.";
+		return base;
 	}
 	
-	public List<Cliente> listar(){	
-		return _repository.findAll();
+	public Cliente obter(Long id) {		
+		Optional<Cliente> cliente = _repository.findById(id);
+		Cliente response = new Cliente();
+		
+		if (cliente == null) {
+			response.Message = "Cliente não encontrado";
+			response.StatusCode = 404;
+			return response;
+		}						
+		
+		response.Message = "Cliente obtido com sucesso";
+		response.StatusCode = 200;		
+		return response;
+	}	
+	
+	public ClienteList listar(){	
+		
+		List<Cliente> lista = _repository.findAll(); 
+		
+		ClienteList response = new ClienteList();		
+		response.setClientes(lista);
+		response.StatusCode = 200;
+		response.Message = "Clientes obtidos com sucesso.";
+		
+		return response;
+	}	
+	
+	public BaseResponse atualizar(Long id, ClienteSpec clienteSpec) {
+		Cliente cliente = new Cliente();		
+		BaseResponse base = new BaseResponse();
+		base.StatusCode = 400;
+
+		if (clienteSpec.getNome() == "") {			
+			base.Message = "O nome do cliente não foi preenchido.";
+			return base;
+		}
+			
+		if (clienteSpec.getTelefone() == "") {
+			base.Message = "O telefone do cliente não foi preenchido.";
+			return base;
+		}		
+		
+		cliente.setId(id);
+		cliente.setNome(clienteSpec.getNome());
+		cliente.setTelefone(clienteSpec.getTelefone());
+		
+		_repository.save(cliente);
+		base.StatusCode = 200;
+		base.Message = "Cliente atualizado com sucesso.";
+		return base;		
+	}
+	
+	public BaseResponse deletar(Long id) {
+		BaseResponse response = new BaseResponse();
+		
+		if (id == null || id == 0) {
+			response.StatusCode = 400;
+			return response;
+		}
+		
+		_repository.deleteById(id);
+		response.StatusCode = 200;
+		return response;
 	}
 
 }
